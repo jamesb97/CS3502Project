@@ -1,0 +1,54 @@
+~cd arch/x86/entry/syscalls/syscall_64.tbl
+334 common rseq    __x64_sys_rseq
+#Project1: new system call
+335 common helloworld    __x64_sys_helloworld
+cd
+cd include/linux/syscalls.h
+
+asmlinkage long sys_pidfd_send_signal(int pidfd, int sig,
+                                      siginfo_t __user *info,
+									  unsigned int flags);
+//Project1: new system call
+asmlinkage long sys_helloworld(void);
+cd..
+kernel/sys.c
+
+do_sysinfo(&val);
+if(copy_to_user(info, &val, sizeof(struct sysinfo)))
+       return -EFAULT;
+return 0;
+}
+//Project1: new system call.
+SYSCALL_DEFINE0(helloworld){
+        printk("helloworld");
+		return 0;
+}
+//Recompile kernel/sys
+//Reboot to new kernel.
+>cd linux-5.1
+cd kernel 
+>touch test_syscall.c
+
+-----TEST PROGRAM-----
+#include <linux/unistd.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <stdio.h>
+#include <unistd.h>
+
+#define __NR_helloworld 335
+int main(int argc, char *argv[]){
+      syscall(__NR_helloworld);
+	  return 0;
+	}
+----
+>gcc test_syscall.c -o test_syscall
+sudo ./test_syscall
+users/VirtualBox/linux-5.1/kernel~: dmesg | grep hello 
+[168.28.186.188] helloworld
+
+linux-5.1        linux-5.1-modified linux-5.1.tar.gz
+> result.txt
+
+ 
+
